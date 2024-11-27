@@ -9,14 +9,20 @@ export async function uploadImage(formData: FormData) {
     return { error: 'No file uploaded' };
   }
 
-  // Check file size (10MB limit)
   if (file.size > 10 * 1024 * 1024) {
     return { error: 'File size exceeds 10MB limit' };
   }
 
   try {
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      throw new Error('BLOB_READ_WRITE_TOKEN is not set');
+    }
 
-    const blob = await put(file.name, file, { access: 'public' });
+    const blob = await put(file.name, file, {
+      access: 'public',
+      token: process.env.BLOB_READ_WRITE_TOKEN
+    });
+
     revalidatePath('/');
     return { success: true, url: blob.url };
   } catch (error) {
