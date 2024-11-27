@@ -1,8 +1,6 @@
 import { UploadForm } from '@/components/UploadForm';
 import { list } from '@vercel/blob';
 import Image from 'next/image'
-import { promises as fs } from 'fs';
-import path from 'path';
 
 export const revalidate = 0
 
@@ -10,14 +8,9 @@ export default async function Home() {
   let images: { url: string }[] = [];
 
   try {
-    if (process.env.VERCEL) {
-      const { blobs } = await list();
-      images = blobs.map(blob => ({ url: blob.url }));
-    } else {
-      const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-      const files = await fs.readdir(uploadsDir);
-      images = files.map(file => ({ url: `/uploads/${file}` }));
-    }
+    // Always use Vercel Blob for listing images
+    const { blobs } = await list();
+    images = blobs.map(blob => ({ url: blob.url }));
   } catch (error) {
     console.error('Error listing images:', error);
   }

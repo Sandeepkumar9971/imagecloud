@@ -3,34 +3,46 @@
 import { useState } from 'react'
 import { uploadImage } from '@/app/actions/upload'
 
+interface UploadResult {
+  error?: string;
+}
+
 export function UploadForm() {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setUploading(true)
     setError(null)
+    setSuccess(false)
 
     const form = event.currentTarget
     const formData = new FormData(form)
 
-    const result = await uploadImage(formData)
+    try {
+      const result: UploadResult = await uploadImage(formData)
 
-    if (result.error) {
-      setError(result.error)
-    } else {
-      form.reset()
+      if (result.error) {
+        setError(result.error)
+      } else {
+        setSuccess(true)
+        form.reset()
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.',)
+      console.log(err)
+    } finally {
+      setUploading(false)
     }
-
-    setUploading(false)
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label htmlFor="file" className="block text-sm font-medium text-gray-700">
-          Choose an image
+          Choose an image (max 10MB)
         </label>
         <input
           type="file"
@@ -54,7 +66,7 @@ export function UploadForm() {
         {uploading ? 'Uploading...' : 'Upload'}
       </button>
       {error && <p className="text-red-500">{error}</p>}
+      {success && <p className="text-green-500">File uploaded successfully!</p>}
     </form>
   )
 }
-
