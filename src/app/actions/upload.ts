@@ -14,13 +14,13 @@ export async function uploadImage(formData: FormData) {
   }
 
   try {
-    if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      throw new Error('BLOB_READ_WRITE_TOKEN is not set');
+    if (!process.env.blob_READ_WRITE_TOKEN) {
+      throw new Error('BLOB_READ_WRITE_TOKEN is not set',);
     }
 
     const blob = await put(file.name, file, {
       access: 'public',
-      token: process.env.BLOB_READ_WRITE_TOKEN
+      token: process.env.blob_READ_WRITE_TOKEN
     });
 
     revalidatePath('/');
